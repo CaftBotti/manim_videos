@@ -47,7 +47,7 @@ class IntroduceTanTheorem(TeacherStudentsScene):
             )
 
 
-class Proof(Scene):
+class Proof(MovingCameraScene):
     def construct(self):
         main_square = Square()
         main_square.scale(3)
@@ -76,6 +76,12 @@ class Proof(Scene):
         arc_u.rotate(180 * DEGREES)
         ut = Line(
             start=point_t, end=point_u
+        )
+        rs = Line(
+            start=point_r, end=point_s
+        )
+        st = Line(
+            start=point_s, end=point_t
         )
         number_plane = NumberPlane()
 
@@ -123,15 +129,145 @@ class Proof(Scene):
         t_label = TexMobject('T').next_to(point_t, direction=RIGHT)
         s_label = TexMobject('S').next_to(point_s, direction=DR)
 
+        square_group = VGroup(p_label, q_label, r_label, s_label, main_square)
+
         right_angle_label_t = VGroup(
             Square().move_to(np.array([2.723, 0.096, 0])).scale(0.2).rotate(26.565051177078 * DEGREES)
         )
 
-        # Debugging
-        self.add(number_plane, main_square, arc_u, arc_t, arc_r, ru, rt, pq, ut, ab_mark_u, a_mark_t, a_mark_r,
-                 b_mark_r, side_length, tan_a_ts, tan_b_qt, tan_a_tan_b_uq, one_minus_tan_a_tan_b_pu,
-                 one_div_cos_a_rt, tan_b_div_cos_a_ut, tan_a_plus_tan_b_rp, p_label, u_label, r_label, q_label,
-                 t_label, s_label, right_angle_label_t)
+        all = VGroup(
+            main_square, ut, ru, pq, u_label,
+        )
+        all_mobjects = VGroup(
+            main_square, ut, ru, pq, rs, s_label, q_label, r_label, t_label, u_label, p_label,
+        )
+
+        # Texts
+
+        this_is_square = TextMobject('This is a square').move_to(np.array([0, 6, 0]))
+        this_is_square.scale(2.5)
+
+        its_side_length = TextMobject('Its side length is 1').move_to(np.array([0, 6, 0]))
+        its_side_length.scale(2.5)
+
+        point_group_1 = VGroup(
+            r_label, s_label, q_label, p_label
+        )
+
+        take_point_t = TextMobject('Take any point $\\mathit{T}$ \\\\'
+                                   'on the line $\\mathit{QS}$')
+        take_point_t.move_to(np.array([-0.5, 0.6, 0]))
+        take_point_t.scale(0.8)
+
+        point_t_arrow = Arrow(start=take_point_t, end=point_t, max_tip_length_to_length_ratio=0.1)
+        point_t_arrow.set_stroke(width=2)
+
+        group_1 = VGroup(take_point_t, point_t_arrow)
+
+        connect_rt = TextMobject('Connect $\\mathit{RT}$')
+        connect_rt.move_to(np.array([-0.5, 0.6, 0]))
+
+        connect_rt_arrow = Arrow(start=connect_rt, end=rt.get_center(), max_tip_length_to_length_ratio=0.1)
+        connect_rt_arrow.set_stroke(width=2)
+
+        group_2 = VGroup(connect_rt_arrow, connect_rt)
+
+        draw_vertical_ut = TextMobject('Draw the vertical line of $\\mathit{RT}$ \\\\'
+                                       'which intersects with $\\mathit{PQ}$ \\\\'
+                                       'at point $\\mathit{U}$').scale(0.8)
+        draw_vertical_ut.move_to(np.array([-1, 0.6, 0]))
+        draw_ut_arrow = Arrow(start=draw_vertical_ut.get_center() + UP, end=point_u,
+                              max_tip_length_to_length_ratio=0.08)
+        draw_ut_arrow.set_stroke(width=2)
+
+        group_3 = VGroup(draw_ut_arrow, draw_vertical_ut)
+
+        connect_ru = TextMobject('Connect $\\mathit{RU}$')
+        connect_ru.move_to(np.array([-3.8, 2, 0]))
+
+        connect_ru_arrow = Arrow(start=connect_ru, end=ru.get_center(),
+                                 max_tip_length_to_length_ratio=0.08)
+        connect_ru_arrow.set_stroke(width=2)
+
+        group_4 = VGroup(connect_ru_arrow, connect_ru)
+
+        anim_1 = VGroup(
+            u_label, ru, ut, right_angle_label_t
+        )
+        anim_2 = VGroup(
+            st, rs, s_label, r_label
+        )
+
+        now_look_at_tsr = TextMobject('Now look at $\\triangle$$\\mathit{TSR}$')
+        now_look_at_tsr.move_to(
+            np.array([-0.5, 0.6, 0])
+        )
+
+        now_look_at_tsr_arrow = Arrow(
+            start=now_look_at_tsr.get_center() + DOWN * 0.5,
+            end=rt.get_center(),
+            max_tip_length_to_length_ratio=0.08
+        )
+        now_look_at_tsr_arrow.set_stroke(
+            width=2
+        )
+
+        group_5 = VGroup(
+            now_look_at_tsr_arrow, now_look_at_tsr
+        )
+
+        tan_a_equals = TexMobject(R'\tan {a}=\frac{TS}{RS}\\'
+                                  R'\mathrm{and~}TS=1\times\tan {a}\\'
+                                  R'\mathrm{so~}TS=\tan {a}')
+        tan_a_equals.move_to(np.array([-1.3, 1.2, 0]))
+        tan_a_equals_arrow = Arrow(start=tan_a_equals.get_center() + DOWN * 2,
+                                   end=st.get_center(),
+                                   max_tip_length_to_length_ratio=0.05)
+        tan_a_equals_arrow.set_stroke(width=2)
+        group_6 = VGroup(tan_a_equals_arrow, tan_a_equals)
+
+        self.camera_frame.save_state()
+        self.camera_frame.set_width(main_square.get_width() * 5)
+
+        self.play(Write(main_square))
+        self.wait(2)
+        self.play(Write(this_is_square))
+        self.wait(3)
+        self.play(Transform(this_is_square, its_side_length))
+        self.wait(3)
+        self.play(Restore(self.camera_frame),
+                  Write(side_length))
+        self.wait(3)
+        self.play(Write(point_group_1))
+        self.wait(2.5)
+        self.play(square_group.fade, 0.5)
+        self.play(Write(group_1))
+        self.wait()
+        self.play(Write(t_label))
+        self.wait(3)
+        self.play(ReplacementTransform(group_1, group_2))
+        self.wait()
+        self.play(Write(rt))
+        self.wait(3)
+        self.play(ReplacementTransform(group_2, group_3))
+        self.wait()
+        self.play(Write(ut))
+        self.play(Write(u_label))
+        self.play(Write(right_angle_label_t))
+        self.wait(3)
+        self.play(ReplacementTransform(group_3, group_4))
+        self.play(Write(ru))
+        self.wait(3)
+        self.play(
+            anim_1.fade,
+            anim_2.fade,
+            VGroup(r_label, s_label).set_opacity, 1
+        )
+        self.play(ReplacementTransform(group_4, group_5))
+        self.wait(2)
+        self.play(ReplacementTransform(group_5, group_6))
+        self.wait(2)
+        self.play(Write(tan_a_ts))
 
 
 class Flip(Scene):
